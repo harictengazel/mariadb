@@ -1,3 +1,3 @@
 # mariadb
 
-MariaDB configurations and optimizastions 
+MariaDB configurations and optimizations 
