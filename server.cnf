@@ -12,7 +12,7 @@
 # GENERAL
 ##################################################
 
-server-id=23140
+server-id=23145
 
 bind-address=0.0.0.0
 
@@ -36,6 +36,7 @@ expire_logs_days=45
 log_warnings=3
 slow_query_log=1
 slow_query_log_file=/var/lib/mysql/slow_query.log
+long_query_time=2
 
 ##################################################
 # ENGINE INDEPENDENT
@@ -103,7 +104,7 @@ table-definition-cache=4096
 
 # https://www.percona.com/blog/2007/09/17/mysql-what-read_buffer_size-value-is-optimal/
 #read_buffer_size = 2M
-https://www.percona.com/blog/2007/07/24/what-exactly-is-read_rnd_buffer_size/
+#https://www.percona.com/blog/2007/07/24/what-exactly-is-read_rnd_buffer_size/
 #read_rnd_buffer_size = 2M
 
 ##################################################
@@ -131,7 +132,8 @@ max_heap_table_size=16384M
 # This one does not really affect performance too much, at least on OS with decent memory allocators. 
 # Still you might want to have it 20MB (sometimes larger) so you can see how much memory Innodb allocates 
 # for misc needs.
-innodb_additional_mem_pool_size=256M
+# DEPRECETED !
+#innodb_additional_mem_pool_size=256M
 
 # Default for this one is kind of OK for many workloads with medium write load and shorter transactions. 
 # If you have update activity spikes however or work with blobs a lot you might want to increase it. 
@@ -185,9 +187,19 @@ innodb_buffer_pool_instances=32
 
 [galera]
 wsrep_provider=/usr/lib64/galera/libgalera_smm.so
-wsrep_cluster_address="gcomm://10.10.23.1,10.10.23.2,10.10.23.3"
+wsrep_cluster_address="gcomm://10.10.10.10,10.10.10.11,10.10.10.13"
 wsrep_cluster_name="CLUSTER"
+
+# Gcache Recipe
+# show global status like 'wsrep_received_bytes'; 
+# show global status like 'wsrep_replicated_bytes'; 
+# select sleep(60);
+# show global status like 'wsrep_received_bytes';
+# show global status like 'wsrep_replicated_bytes';
+# (second wsrep_received_bytes – first wsrep_received_bytes) + (second wsrep_replicated_bytes – first wsrep_replicated_bytes) * 60 = 
+# Nb of bytes written in the gcache for 1 hour
 wsrep_provider_options="gcache.size=1200M; gcache.page_size=2G"
+
 binlog_format=row
 wsrep_notify_cmd="/usr/local/bin/galeranotify.py"
 wsrep_on=ON
